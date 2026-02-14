@@ -4,6 +4,11 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.mapper.ScoreMapper">
 
+    <insert id="insert" parameterType="com.example.entity.Score" useGeneratedKeys="true" keyProperty="id">
+        insert into score (student_id, course_id, choice_id, score, usual_score, exam_score, semester)
+        values (#{studentId}, #{courseId}, #{choiceId}, #{score}, #{usualScore}, #{examScore}, #{semester})
+    </insert>
+
     <select id="selectByCondition" parameterType="com.example.entity.Score" resultType="com.example.entity.Score">
         select score.*, student.name as studentName, student.code as studentCode,
                course.name as courseName, course.no as courseNo

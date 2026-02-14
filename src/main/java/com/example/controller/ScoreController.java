@@ -18,6 +18,15 @@ public class ScoreController {
     private ScoreService scoreService;
 
     /**
+     * 管理员/教师录入学生成绩
+     */
+    @PostMapping("/add")
+    public Result add(@RequestBody Score score) {
+        scoreService.addScore(score);
+        return Result.success();
+    }
+
+    /**
      * 学生查询自己的成绩（分页）
      */
     @GetMapping("/myScores")

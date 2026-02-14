@@ -74,4 +74,42 @@ public class ScoreService {
             "passRate", courseCount > 0 ? (double) passCount / courseCount * 100 : 0.0
         );
     }
+
+    /**
+     * 管理员/教师录入学生成绩
+     */
+    public void addScore(Score score) {
+        // 验证必填字段
+        if (ObjectUtil.isEmpty(score.getStudentId())) {
+            throw new CustomException("学生ID不能为空");
+        }
+        if (ObjectUtil.isEmpty(score.getCourseId())) {
+            throw new CustomException("课程ID不能为空");
+        }
+        if (ObjectUtil.isEmpty(score.getChoiceId())) {
+            throw new CustomException("选课ID不能为空");
+        }
+        if (ObjectUtil.isEmpty(score.getSemester())) {
+            throw new CustomException("学期不能为空");
+        }
+        
+        // 检查选课ID是否已存在成绩
+        Score existingScore = scoreMapper.selectByChoiceId(score.getChoiceId());
+        if (ObjectUtil.isNotEmpty(existingScore)) {
+            throw new CustomException("该选课记录已存在成绩，请使用修改功能");
+        }
+        
+        // 验证成绩范围
+        if (score.getScore() != null && (score.getScore() < 0 || score.getScore() > 100)) {
+            throw new CustomException("成绩分数必须在0-100之间");
+        }
+        if (score.getUsualScore() != null && (score.getUsualScore() < 0 || score.getUsualScore() > 100)) {
+            throw new CustomException("平时成绩必须在0-100之间");
+        }
+        if (score.getExamScore() != null && (score.getExamScore() < 0 || score.getExamScore() > 100)) {
+            throw new CustomException("考试成绩必须在0-100之间");
+        }
+        
+        scoreMapper.insert(score);
+    }
 }
