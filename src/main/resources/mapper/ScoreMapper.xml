@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.ScoreMapper">
+
+    <select id="selectByCondition" parameterType="com.example.entity.Score" resultType="com.example.entity.Score">
+        select score.*, student.name as studentName, student.code as studentCode,
+               course.name as courseName, course.no as courseNo
+        from score
+        left join student on score.student_id = student.id
+        left join course on score.course_id = course.id
+        <where>
+            <if test="studentId != null">
+                and score.student_id = #{studentId}
+            </if>
+            <if test="semester != null and semester != ''">
+                and score.semester = #{semester}
+            </if>
+            <if test="courseName != null and courseName != ''">
+                and course.name like concat('%', #{courseName}, '%')
+            </if>
+        </where>
+        order by score.create_time desc
+    </select>
+
+</mapper>
