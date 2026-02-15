@@ -14,4 +14,29 @@
         where id = #{id} 
     </update>
 
+    <!-- 根据课程ID查询选课学生信息（包含完整学生信息和成绩） -->
+    <select id="selectStudentsByCourseId" parameterType="java.lang.Integer" resultType="com.example.entity.CourseStudentInfo">
+        SELECT 
+            ch.id as choiceId,
+            ch.student_id as studentId,
+            s.code as studentNo,
+            s.name as studentName,
+            c.name as collegeName,
+            sp.name as specialityName,
+            <!-- 班级信息，如果没有班级表，可以用学号前缀或其他方式生成 -->
+            CONCAT(s.code, '班') as className,
+            sc.score as totalScore,
+            sc.usual_score as usualScore,
+            sc.exam_score as examScore,
+            sc.semester,
+            ch.course_id as courseId
+        FROM choice ch
+        LEFT JOIN student s ON ch.student_id = s.id
+        LEFT JOIN college c ON s.college_id = c.id
+        LEFT JOIN speciality sp ON s.speciality_id = sp.id
+        LEFT JOIN score sc ON ch.id = sc.choice_id
+        WHERE ch.course_id = #{courseId}
+        ORDER BY s.code ASC
+    </select>
+
 </mapper>

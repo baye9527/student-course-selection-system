@@ -1,6 +1,7 @@
 package com.example.mapper;
 
 import com.example.entity.Choice;
+import com.example.entity.CourseStudentInfo;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -58,4 +59,9 @@ public interface ChoiceMapper {
 
     @Select("select * from choice where id = #{id}")
     Choice selectById(Integer id);
+
+    /**
+     * 根据课程ID查询选课学生信息（包含完整学生信息和成绩）
+     */
+    List<CourseStudentInfo> selectStudentsByCourseId(Integer courseId);
 }

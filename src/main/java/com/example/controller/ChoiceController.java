@@ -3,6 +3,7 @@ package com.example.controller;
 import com.example.common.Result;
 import com.example.entity.Choice;
 import com.example.entity.Course;
+import com.example.entity.CourseStudentInfo;
 import com.example.service.ChoiceService;
 import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
@@ -80,5 +81,14 @@ public class ChoiceController {
         String sql = "SELECT COUNT(*) FROM choice";
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class);
         return Result.success(count);
+    }
+
+    /**
+     * 根据课程ID查询选课学生信息（用于成绩管理）
+     */
+    @GetMapping("/selectStudentsByCourseId/{courseId}")
+    public Result selectStudentsByCourseId(@PathVariable Integer courseId) {
+        List<CourseStudentInfo> students = choiceService.selectStudentsByCourseId(courseId);
+        return Result.success(students);
     }
 }

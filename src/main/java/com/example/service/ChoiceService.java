@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.example.entity.Choice;
 import com.example.entity.Course;
+import com.example.entity.CourseStudentInfo;
 import com.example.entity.Student;
 import com.example.exception.CustomException;
 import com.example.mapper.ChoiceMapper;
@@ -104,5 +105,22 @@ public class ChoiceService {
 
     public List<Choice> selectAll() {
         return choiceMapper.selectAll();
+    }
+
+    /**
+     * 根据课程ID查询选课学生信息（用于成绩管理）
+     */
+    public List<CourseStudentInfo> selectStudentsByCourseId(Integer courseId) {
+        if (ObjectUtil.isEmpty(courseId)) {
+            throw new CustomException("课程ID不能为空");
+        }
+        
+        // 验证课程是否存在
+        Course course = courseMapper.selectById(courseId);
+        if (ObjectUtil.isEmpty(course)) {
+            throw new CustomException("课程不存在");
+        }
+        
+        return choiceMapper.selectStudentsByCourseId(courseId);
     }
 }
