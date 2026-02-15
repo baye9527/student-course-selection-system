@@ -32,4 +32,9 @@ public interface ScoreMapper {
      * 条件查询成绩（用于分页查询）
      */
     List<Score> selectByCondition(Score score);
+
+    /**
+     * 根据ID更新成绩记录
+     */
+    void updateById(Score score);
 }

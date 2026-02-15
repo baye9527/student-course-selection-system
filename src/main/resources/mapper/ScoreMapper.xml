@@ -9,6 +9,16 @@
         values (#{studentId}, #{courseId}, #{choiceId}, #{score}, #{usualScore}, #{examScore}, #{semester})
     </insert>
 
+    <update id="updateById" parameterType="com.example.entity.Score">
+        update score 
+        set usual_score = #{usualScore}, 
+            exam_score = #{examScore}, 
+            score = #{score},
+            semester = #{semester},
+            update_time = NOW()
+        where id = #{id}
+    </update>
+
     <select id="selectByCondition" parameterType="com.example.entity.Score" resultType="com.example.entity.Score">
         select score.*, student.name as studentName, student.code as studentCode,
                course.name as courseName, course.no as courseNo

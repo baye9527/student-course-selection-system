@@ -7,6 +7,8 @@ import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * 学生成绩查询接口
  */
@@ -27,6 +29,15 @@ public class ScoreController {
     }
 
     /**
+     * 批量更新学生成绩（用于成绩管理页面）
+     */
+    @PostMapping("/batchUpdate")
+    public Result batchUpdate(@RequestBody List<Score> scores) {
+        scoreService.batchUpdateScores(scores);
+        return Result.success();
+    }
+
+    /**
      * 学生查询自己的成绩（分页）
      */
     @GetMapping("/myScores")
@@ -43,7 +54,6 @@ public class ScoreController {
      */
     @GetMapping("/myStatistics")
     public Result myStatistics(@RequestParam Integer studentId) {
-        java.util.Map<String, Object> statistics = scoreService.getMyScoreStatistics(studentId);
-        return Result.success(statistics);
+        return Result.success(scoreService.getMyScoreStatistics(studentId));
     }
 }

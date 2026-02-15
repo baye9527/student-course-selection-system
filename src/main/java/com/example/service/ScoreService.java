@@ -28,8 +28,6 @@ public class ScoreService {
             throw new CustomException("学生ID不能为空");
         }
         
-        PageHelper.startPage(pageNum, pageSize);
-        
         // 构建查询条件
         Score score = new Score();
         score.setStudentId(studentId);
@@ -42,7 +40,7 @@ public class ScoreService {
     }
 
     /**
-     * 学生查询自己的成绩统计
+     * 获取学生成绩统计信息
      */
     public java.util.Map<String, Object> getMyScoreStatistics(Integer studentId) {
         if (ObjectUtil.isEmpty(studentId)) {
@@ -68,10 +66,10 @@ public class ScoreService {
                 .count();
         
         return java.util.Map.of(
-            "averageScore", courseCount > 0 ? averageScore / courseCount : 0.0,
-            "courseCount", courseCount,
-            "passCount", passCount,
-            "passRate", courseCount > 0 ? (double) passCount / courseCount * 100 : 0.0
+                "averageScore", courseCount > 0 ? averageScore / courseCount : 0.0,
+                "courseCount", courseCount,
+                "passCount", passCount,
+                "passRate", courseCount > 0 ? (double) passCount / courseCount * 100 : 0.0
         );
     }
 
@@ -111,5 +109,45 @@ public class ScoreService {
         }
         
         scoreMapper.insert(score);
+    }
+
+    /**
+     * 批量更新学生成绩（用于成绩管理页面）
+     */
+    public void batchUpdateScores(List<Score> scores) {
+        if (ObjectUtil.isEmpty(scores)) {
+            throw new CustomException("成绩数据不能为空");
+        }
+        
+        for (Score score : scores) {
+            // 验证必填字段
+            if (ObjectUtil.isEmpty(score.getChoiceId())) {
+                throw new CustomException("选课ID不能为空");
+            }
+            if (ObjectUtil.isEmpty(score.getSemester())) {
+                throw new CustomException("学期不能为空");
+            }
+            
+            // 验证成绩范围
+            if (score.getUsualScore() != null && (score.getUsualScore() < 0 || score.getUsualScore() > 100)) {
+                throw new CustomException("平时成绩必须在0-100之间");
+            }
+            if (score.getExamScore() != null && (score.getExamScore() < 0 || score.getExamScore() > 100)) {
+                throw new CustomException("考试成绩必须在0-100之间");
+            }
+            
+            // 检查是否已存在成绩记录
+            Score existingScore = scoreMapper.selectByChoiceId(score.getChoiceId());
+            
+            if (ObjectUtil.isNotEmpty(existingScore)) {
+                // 更新现有成绩
+                score.setId(existingScore.getId());
+                scoreMapper.updateById(score);
+            } else {
+                // 插入新成绩记录
+                // 需要从选课记录中获取学生ID和课程ID
+                scoreMapper.insert(score);
+            }
+        }
     }
 }
