@@ -2,6 +2,7 @@ package com.example.mapper;
 
 import com.example.entity.Score;
 import com.example.entity.StudentScoreInfo;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import java.util.List;
 
@@ -43,4 +44,12 @@ public interface ScoreMapper {
      * 学生查询自己的成绩（返回简化字段）
      */
     List<StudentScoreInfo> selectStudentScores(Score score);
+
+    /**
+     * 根据学生ID、课程ID、学期查询成绩
+     */
+    @Select("select * from score where student_id = #{studentId} and course_id = #{courseId} and semester = #{semester}")
+    Score selectByStudentCourseSemester(@Param("studentId") Integer studentId, 
+                                       @Param("courseId") Integer courseId, 
+                                       @Param("semester") String semester);
 }

@@ -1,12 +1,14 @@
 package com.example.controller;
 
 import com.example.common.Result;
+import com.example.entity.ImportResult;
 import com.example.entity.Score;
 import com.example.entity.StudentScoreInfo;
 import com.example.service.ScoreService;
 import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -68,5 +70,20 @@ public class ScoreController {
     @GetMapping("/myStatistics")
     public Result myStatistics(@RequestParam Integer studentId) {
         return Result.success(scoreService.getMyScoreStatistics(studentId));
+    }
+
+    /**
+     * Excel批量导入成绩
+     */
+    @PostMapping("/import")
+    public Result importScores(@RequestParam("file") MultipartFile file,
+                               @RequestParam("courseId") Integer courseId,
+                               @RequestParam("semester") String semester) {
+        try {
+            ImportResult result = scoreService.importScores(file, courseId, semester);
+            return Result.success(result);
+        } catch (Exception e) {
+            return Result.error("导入失败：" + e.getMessage());
+        }
     }
 }

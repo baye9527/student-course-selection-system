@@ -34,6 +34,13 @@ public interface StudentMapper {
             "from student " +
             "left join college on student.college_id = college.id " +
             "left join speciality on student.speciality_id = speciality.id " +
+            "where student.code = #{code}")
+    Student selectByCode(String code);
+
+    @Select("select student.*, college.name as collegeName, speciality.name as specialityName " +
+            "from student " +
+            "left join college on student.college_id = college.id " +
+            "left join speciality on student.speciality_id = speciality.id " +
             "where student.id = #{id}")
     Student selectById(Integer id);
 }

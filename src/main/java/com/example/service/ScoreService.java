@@ -1,17 +1,27 @@
 package com.example.service;
 
 import cn.hutool.core.util.ObjectUtil;
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.context.AnalysisContext;
+import com.alibaba.excel.event.AnalysisEventListener;
 import com.example.entity.Choice;
+import com.example.entity.ExcelScoreData;
+import com.example.entity.ImportResult;
 import com.example.entity.Score;
+import com.example.entity.Student;
 import com.example.entity.StudentScoreInfo;
 import com.example.exception.CustomException;
 import com.example.mapper.ChoiceMapper;
 import com.example.mapper.ScoreMapper;
+import com.example.mapper.StudentMapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -25,6 +35,9 @@ public class ScoreService {
     
     @Resource
     private ChoiceMapper choiceMapper;
+    
+    @Resource
+    private StudentMapper studentMapper;
 
     /**
      * 学生查询自己的成绩（分页）- 返回完整信息
@@ -235,6 +248,117 @@ public class ScoreService {
                 
                 scoreMapper.insert(score);
             }
+        }
+    }
+
+    /**
+     * Excel批量导入成绩
+     */
+    public ImportResult importScores(MultipartFile file, Integer courseId, String semester) throws IOException {
+        if (ObjectUtil.isEmpty(file)) {
+            throw new CustomException("文件不能为空");
+        }
+        if (ObjectUtil.isEmpty(courseId)) {
+            throw new CustomException("课程ID不能为空");
+        }
+        if (ObjectUtil.isEmpty(semester)) {
+            throw new CustomException("学期不能为空");
+        }
+
+        ImportResult result = new ImportResult();
+        result.setFailReasons(new ArrayList<>());
+
+        // 使用EasyExcel读取文件
+        EasyExcel.read(file.getInputStream(), ExcelScoreData.class, new AnalysisEventListener<ExcelScoreData>() {
+            @Override
+            public void invoke(ExcelScoreData data, AnalysisContext context) {
+                try {
+                    // 1. 数据校验
+                    validateExcelData(data);
+                    
+                    // 2. 根据学号查询学生
+                    Student student = studentMapper.selectByCode(data.getStudentNo());
+                    if (ObjectUtil.isEmpty(student)) {
+                        result.addFail("学号不存在：" + data.getStudentNo());
+                        return;
+                    }
+                    
+                    // 3. 检查选课记录
+                    List<Choice> choices = choiceMapper.selectByCourseIdAndStudentId(courseId, student.getId());
+                    if (ObjectUtil.isEmpty(choices) || choices.isEmpty()) {
+                        result.addFail("学生未选该课程：" + data.getStudentNo());
+                        return;
+                    }
+                    
+                    // 4. 计算总成绩
+                    Score score = new Score();
+                    score.setStudentId(student.getId());
+                    score.setCourseId(courseId);
+                    score.setChoiceId(choices.get(0).getId());
+                    score.setUsualScore(data.getUsualScore());
+                    score.setExamScore(data.getExamScore());
+                    score.setSemester(semester);
+                    
+                    // 自动计算总成绩：平时成绩40% + 考试成绩60%
+                    if (score.getUsualScore() != null && score.getExamScore() != null) {
+                        double totalScore = score.getUsualScore() * 0.4 + score.getExamScore() * 0.6;
+                        // 四舍五入保留1位小数
+                        score.setScore(Math.round(totalScore * 10.0) / 10.0);
+                    } else if (score.getUsualScore() != null) {
+                        score.setScore(score.getUsualScore());
+                    } else if (score.getExamScore() != null) {
+                        score.setScore(score.getExamScore());
+                    } else {
+                        score.setScore(null);
+                    }
+                    
+                    // 5. 检查是否已存在成绩记录
+                    Score existingScore = scoreMapper.selectByStudentCourseSemester(
+                        student.getId(), courseId, semester);
+                    
+                    if (ObjectUtil.isNotEmpty(existingScore)) {
+                        // 更新现有成绩
+                        score.setId(existingScore.getId());
+                        scoreMapper.updateById(score);
+                    } else {
+                        // 插入新成绩记录
+                        scoreMapper.insert(score);
+                    }
+                    
+                    result.addSuccess();
+                    
+                } catch (Exception e) {
+                    result.addFail("处理失败：" + data.getStudentNo() + "，原因：" + e.getMessage());
+                }
+            }
+
+            @Override
+            public void doAfterAllAnalysed(AnalysisContext context) {
+                // 所有数据解析完成
+            }
+        }).sheet().doRead();
+
+        return result;
+    }
+
+    /**
+     * 校验Excel数据
+     */
+    private void validateExcelData(ExcelScoreData data) {
+        if (ObjectUtil.isEmpty(data.getStudentNo())) {
+            throw new CustomException("学号不能为空");
+        }
+        
+        if (data.getUsualScore() != null && (data.getUsualScore() < 0 || data.getUsualScore() > 100)) {
+            throw new CustomException("平时成绩必须在0-100之间");
+        }
+        
+        if (data.getExamScore() != null && (data.getExamScore() < 0 || data.getExamScore() > 100)) {
+            throw new CustomException("考试成绩必须在0-100之间");
+        }
+        
+        if (data.getUsualScore() == null && data.getExamScore() == null) {
+            throw new CustomException("平时成绩和考试成绩至少填写一个");
         }
     }
 }
