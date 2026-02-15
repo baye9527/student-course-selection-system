@@ -23,8 +23,8 @@
             s.name as studentName,
             c.name as collegeName,
             sp.name as specialityName,
-            <!-- 班级信息，如果没有班级表，可以用学号前缀或其他方式生成 -->
-            CONCAT(s.code, '班') as className,
+            <!-- 班级信息，用学号前缀生成 -->
+            CONCAT(SUBSTRING(s.code, 1, 4), '级', SUBSTRING(s.code, 5, 2), '班') as className,
             sc.score as totalScore,
             sc.usual_score as usualScore,
             sc.exam_score as examScore,

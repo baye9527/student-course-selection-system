@@ -14,9 +14,11 @@ public class Student extends Account {
     private String sex;
     private String code;
     private Integer collegeId;
+    private Integer specialityId;
     private Integer score;
 
     private String collegeName;
+    private String specialityName;
 
     @Override
     public Integer getId() {
@@ -68,12 +70,10 @@ public class Student extends Account {
         this.avatar = avatar;
     }
 
-    @Override
     public String getName() {
         return name;
     }
 
-    @Override
     public void setName(String name) {
         this.name = name;
     }
@@ -102,6 +102,14 @@ public class Student extends Account {
         this.collegeId = collegeId;
     }
 
+    public Integer getSpecialityId() {
+        return specialityId;
+    }
+
+    public void setSpecialityId(Integer specialityId) {
+        this.specialityId = specialityId;
+    }
+
     public Integer getScore() {
         return score;
     }
@@ -116,5 +124,13 @@ public class Student extends Account {
 
     public void setCollegeName(String collegeName) {
         this.collegeName = collegeName;
+    }
+
+    public String getSpecialityName() {
+        return specialityName;
+    }
+
+    public void setSpecialityName(String specialityName) {
+        this.specialityName = specialityName;
     }
 }

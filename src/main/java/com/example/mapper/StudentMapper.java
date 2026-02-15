@@ -12,11 +12,16 @@ public interface StudentMapper {
     @Select("select * from student where username = #{username}")
     Student selectByUsername(String username);
 
-    @Select("select student.*, college.name as collegeName from student left join college on student.college_id = college.id")
+    @Select("select student.*, college.name as collegeName, speciality.name as specialityName " +
+            "from student " +
+            "left join college on student.college_id = college.id " +
+            "left join speciality on student.speciality_id = speciality.id")
     List<Student> selectAll();
 
-    @Select("select student.*, college.name as collegeName from student " +
+    @Select("select student.*, college.name as collegeName, speciality.name as specialityName " +
+            "from student " +
             "left join college on student.college_id = college.id " +
+            "left join speciality on student.speciality_id = speciality.id " +
             "where student.name like concat('%', #{name}, '%')")
     List<Student> selectByName(String name);
 
@@ -25,8 +30,10 @@ public interface StudentMapper {
     @Delete("delete from student where id = #{id}")
     void deleteById(Integer id);
 
-    @Select("select student.*, college.name as collegeName from student " +
+    @Select("select student.*, college.name as collegeName, speciality.name as specialityName " +
+            "from student " +
             "left join college on student.college_id = college.id " +
+            "left join speciality on student.speciality_id = speciality.id " +
             "where student.id = #{id}")
     Student selectById(Integer id);
 }
