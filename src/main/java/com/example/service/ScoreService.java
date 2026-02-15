@@ -1,8 +1,10 @@
 package com.example.service;
 
 import cn.hutool.core.util.ObjectUtil;
+import com.example.entity.Choice;
 import com.example.entity.Score;
 import com.example.exception.CustomException;
+import com.example.mapper.ChoiceMapper;
 import com.example.mapper.ScoreMapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -19,6 +21,9 @@ public class ScoreService {
 
     @Resource
     private ScoreMapper scoreMapper;
+    
+    @Resource
+    private ChoiceMapper choiceMapper;
 
     /**
      * 学生查询自己的成绩（分页）
@@ -145,7 +150,13 @@ public class ScoreService {
                 scoreMapper.updateById(score);
             } else {
                 // 插入新成绩记录
-                // 需要从选课记录中获取学生ID和课程ID
+                // 从选课记录中获取学生ID和课程ID
+                Choice choice = choiceMapper.selectById(score.getChoiceId());
+                if (ObjectUtil.isEmpty(choice)) {
+                    throw new CustomException("选课记录不存在");
+                }
+                score.setStudentId(choice.getStudentId());
+                score.setCourseId(choice.getCourseId());
                 scoreMapper.insert(score);
             }
         }
