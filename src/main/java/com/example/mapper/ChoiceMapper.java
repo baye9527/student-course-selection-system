@@ -57,7 +57,10 @@ public interface ChoiceMapper {
     )
     List<Choice> selectAllByTeacherId(Integer teacherId);
 
-    @Select("select * from choice where id = #{id}")
+    @Select("select choice.*, teacher.name as teacherName, student.name as studentName from choice " +
+            "left join teacher on choice.teacher_id = teacher.id " +
+            "left join student on choice.student_id = student.id " +
+            "where choice.id = #{id}")
     Choice selectById(Integer id);
 
     /**

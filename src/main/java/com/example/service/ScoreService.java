@@ -151,9 +151,12 @@ public class ScoreService {
             } else {
                 // 插入新成绩记录
                 // 从选课记录中获取学生ID和课程ID
+                System.out.println("正在查询选课记录，choiceId: " + score.getChoiceId());
                 Choice choice = choiceMapper.selectById(score.getChoiceId());
+                System.out.println("查询到的选课记录: " + choice);
+                
                 if (ObjectUtil.isEmpty(choice)) {
-                    throw new CustomException("选课记录不存在");
+                    throw new CustomException("选课记录不存在，choiceId: " + score.getChoiceId());
                 }
                 score.setStudentId(choice.getStudentId());
                 score.setCourseId(choice.getCourseId());
