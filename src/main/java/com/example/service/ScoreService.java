@@ -103,14 +103,27 @@ public class ScoreService {
         }
         
         // 验证成绩范围
-        if (score.getScore() != null && (score.getScore() < 0 || score.getScore() > 100)) {
-            throw new CustomException("成绩分数必须在0-100之间");
-        }
         if (score.getUsualScore() != null && (score.getUsualScore() < 0 || score.getUsualScore() > 100)) {
             throw new CustomException("平时成绩必须在0-100之间");
         }
         if (score.getExamScore() != null && (score.getExamScore() < 0 || score.getExamScore() > 100)) {
             throw new CustomException("考试成绩必须在0-100之间");
+        }
+        
+        // 自动计算总成绩：平时成绩40% + 考试成绩60%
+        if (score.getUsualScore() != null && score.getExamScore() != null) {
+            double totalScore = score.getUsualScore() * 0.4 + score.getExamScore() * 0.6;
+            // 四舍五入保留1位小数
+            score.setScore(Math.round(totalScore * 10.0) / 10.0);
+        } else if (score.getUsualScore() != null) {
+            // 只有平时成绩，按100%计算
+            score.setScore(score.getUsualScore());
+        } else if (score.getExamScore() != null) {
+            // 只有考试成绩，按100%计算
+            score.setScore(score.getExamScore());
+        } else {
+            // 都没有，总成绩为null
+            score.setScore(null);
         }
         
         scoreMapper.insert(score);
@@ -147,6 +160,23 @@ public class ScoreService {
             if (ObjectUtil.isNotEmpty(existingScore)) {
                 // 更新现有成绩
                 score.setId(existingScore.getId());
+                
+                // 自动计算总成绩：平时成绩40% + 考试成绩60%
+                if (score.getUsualScore() != null && score.getExamScore() != null) {
+                    double totalScore = score.getUsualScore() * 0.4 + score.getExamScore() * 0.6;
+                    // 四舍五入保留1位小数
+                    score.setScore(Math.round(totalScore * 10.0) / 10.0);
+                } else if (score.getUsualScore() != null) {
+                    // 只有平时成绩，按100%计算
+                    score.setScore(score.getUsualScore());
+                } else if (score.getExamScore() != null) {
+                    // 只有考试成绩，按100%计算
+                    score.setScore(score.getExamScore());
+                } else {
+                    // 都没有，总成绩为null
+                    score.setScore(null);
+                }
+                
                 scoreMapper.updateById(score);
             } else {
                 // 插入新成绩记录
@@ -160,6 +190,23 @@ public class ScoreService {
                 }
                 score.setStudentId(choice.getStudentId());
                 score.setCourseId(choice.getCourseId());
+                
+                // 自动计算总成绩：平时成绩40% + 考试成绩60%
+                if (score.getUsualScore() != null && score.getExamScore() != null) {
+                    double totalScore = score.getUsualScore() * 0.4 + score.getExamScore() * 0.6;
+                    // 四舍五入保留1位小数
+                    score.setScore(Math.round(totalScore * 10.0) / 10.0);
+                } else if (score.getUsualScore() != null) {
+                    // 只有平时成绩，按100%计算
+                    score.setScore(score.getUsualScore());
+                } else if (score.getExamScore() != null) {
+                    // 只有考试成绩，按100%计算
+                    score.setScore(score.getExamScore());
+                } else {
+                    // 都没有，总成绩为null
+                    score.setScore(null);
+                }
+                
                 scoreMapper.insert(score);
             }
         }
