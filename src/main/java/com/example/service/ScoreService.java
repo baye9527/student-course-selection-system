@@ -3,6 +3,7 @@ package com.example.service;
 import cn.hutool.core.util.ObjectUtil;
 import com.example.entity.Choice;
 import com.example.entity.Score;
+import com.example.entity.StudentScoreInfo;
 import com.example.exception.CustomException;
 import com.example.mapper.ChoiceMapper;
 import com.example.mapper.ScoreMapper;
@@ -26,12 +27,15 @@ public class ScoreService {
     private ChoiceMapper choiceMapper;
 
     /**
-     * 学生查询自己的成绩（分页）
+     * 学生查询自己的成绩（分页）- 返回完整信息
      */
     public PageInfo<Score> selectMyScores(Integer studentId, String semester, Integer pageNum, Integer pageSize) {
         if (ObjectUtil.isEmpty(studentId)) {
             throw new CustomException("学生ID不能为空");
         }
+        
+        // 设置分页
+        PageHelper.startPage(pageNum, pageSize);
         
         // 构建查询条件
         Score score = new Score();
@@ -41,6 +45,28 @@ public class ScoreService {
         }
         
         List<Score> list = scoreMapper.selectByCondition(score);
+        return PageInfo.of(list);
+    }
+
+    /**
+     * 学生查询自己的成绩（分页）- 返回简化信息
+     */
+    public PageInfo<StudentScoreInfo> selectMyScoresSimple(Integer studentId, String semester, Integer pageNum, Integer pageSize) {
+        if (ObjectUtil.isEmpty(studentId)) {
+            throw new CustomException("学生ID不能为空");
+        }
+        
+        // 设置分页
+        PageHelper.startPage(pageNum, pageSize);
+        
+        // 构建查询条件
+        Score score = new Score();
+        score.setStudentId(studentId);
+        if (ObjectUtil.isNotEmpty(semester)) {
+            score.setSemester(semester);
+        }
+        
+        List<StudentScoreInfo> list = scoreMapper.selectStudentScores(score);
         return PageInfo.of(list);
     }
 

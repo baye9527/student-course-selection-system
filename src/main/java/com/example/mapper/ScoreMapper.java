@@ -1,6 +1,7 @@
 package com.example.mapper;
 
 import com.example.entity.Score;
+import com.example.entity.StudentScoreInfo;
 import org.apache.ibatis.annotations.Select;
 import java.util.List;
 
@@ -37,4 +38,9 @@ public interface ScoreMapper {
      * 根据ID更新成绩记录
      */
     void updateById(Score score);
+
+    /**
+     * 学生查询自己的成绩（返回简化字段）
+     */
+    List<StudentScoreInfo> selectStudentScores(Score score);
 }

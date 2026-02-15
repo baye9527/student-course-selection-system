@@ -39,4 +39,25 @@
         order by score.create_time desc
     </select>
 
+    <!-- 学生查询自己的成绩（返回简化字段） -->
+    <select id="selectStudentScores" parameterType="com.example.entity.Score" resultType="com.example.entity.StudentScoreInfo">
+        select 
+            course.name as courseName,
+            score.usual_score as usualScore,
+            score.exam_score as examScore,
+            score.score,
+            score.semester
+        from score
+        left join course on score.course_id = course.id
+        <where>
+            <if test="studentId != null">
+                and score.student_id = #{studentId}
+            </if>
+            <if test="semester != null and semester != ''">
+                and score.semester = #{semester}
+            </if>
+        </where>
+        order by score.create_time desc
+    </select>
+
 </mapper>

@@ -2,6 +2,7 @@ package com.example.controller;
 
 import com.example.common.Result;
 import com.example.entity.Score;
+import com.example.entity.StudentScoreInfo;
 import com.example.service.ScoreService;
 import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
@@ -38,7 +39,7 @@ public class ScoreController {
     }
 
     /**
-     * 学生查询自己的成绩（分页）
+     * 学生查询自己的成绩（分页）- 返回完整信息
      */
     @GetMapping("/myScores")
     public Result myScores(@RequestParam Integer studentId,
@@ -46,6 +47,18 @@ public class ScoreController {
                            @RequestParam(defaultValue = "1") Integer pageNum,
                            @RequestParam(defaultValue = "10") Integer pageSize) {
         PageInfo<Score> pageInfo = scoreService.selectMyScores(studentId, semester, pageNum, pageSize);
+        return Result.success(pageInfo);
+    }
+
+    /**
+     * 学生查询自己的成绩（分页）- 返回简化信息
+     */
+    @GetMapping("/myScoresSimple")
+    public Result myScoresSimple(@RequestParam Integer studentId,
+                              @RequestParam(required = false) String semester,
+                              @RequestParam(defaultValue = "1") Integer pageNum,
+                              @RequestParam(defaultValue = "10") Integer pageSize) {
+        PageInfo<StudentScoreInfo> pageInfo = scoreService.selectMyScoresSimple(studentId, semester, pageNum, pageSize);
         return Result.success(pageInfo);
     }
 
